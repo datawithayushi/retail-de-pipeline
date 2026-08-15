@@ -1,0 +1,145 @@
+{
+  "name": "Compute Product Revenue",
+  "email_notifications": {
+    "no_alert_for_skipped_runs": false
+  },
+  "webhook_notifications": {},
+  "timeout_seconds": 0,
+  "max_concurrent_runs": 1,
+  "tasks": [
+    {
+      "task_key": "cleanup_datalake",
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/ayushimagarde19@gmail.com/Notebook/ELT Data Pipeline for Daily Product Revenue/01 Cleanup Database and Datasets",
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    },
+    {
+      "task_key": "file_format_converter_order_items",
+      "depends_on": [
+        {
+          "task_key": "cleanup_datalake"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/ayushimagarde19@gmail.com/Notebook/ELT Data Pipeline for Daily Product Revenue/02 File Format Converter",
+        "base_parameters": {
+          "ds": "order_items",
+          "src_base_dir": "/Volumes/data_engg_udemy/retaildb/landing_zone/retail_db",
+          "bronze_base_dir": "/Volumes/data_engg_udemy/retaildb/landing_zone/retail_db_bronze"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "disabled": false
+    },
+    {
+      "task_key": "Create_spark_table_order_items",
+      "depends_on": [
+        {
+          "task_key": "file_format_converter_order_items"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/ayushimagarde19@gmail.com/Notebook/ELT Data Pipeline for Daily Product Revenue/03 Create Spark SQL Tables",
+        "base_parameters": {
+          "table_name": "order_items",
+          "bronze_base_dir": "/Volumes/data_engg_udemy/retaildb/landing_zone/retail_db_bronze/"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    },
+    {
+      "task_key": "file_format_converter_orders",
+      "depends_on": [
+        {
+          "task_key": "cleanup_datalake"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/ayushimagarde19@gmail.com/Notebook/ELT Data Pipeline for Daily Product Revenue/02 File Format Converter",
+        "base_parameters": {
+          "ds": "orders",
+          "src_base_dir": "/Volumes/data_engg_udemy/retaildb/landing_zone/retail_db",
+          "bronze_base_dir": "/Volumes/data_engg_udemy/retaildb/landing_zone/retail_db_bronze"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "disabled": false
+    },
+    {
+      "task_key": "Create_spark_table_orders",
+      "depends_on": [
+        {
+          "task_key": "file_format_converter_orders"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/ayushimagarde19@gmail.com/Notebook/ELT Data Pipeline for Daily Product Revenue/03 Create Spark SQL Tables",
+        "base_parameters": {
+          "table_name": "orders",
+          "bronze_base_dir": "/Volumes/data_engg_udemy/retaildb/landing_zone/retail_db_bronze/"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    },
+    {
+      "task_key": "compute_daily_product_revenue",
+      "depends_on": [
+        {
+          "task_key": "Create_spark_table_orders"
+        },
+        {
+          "task_key": "Create_spark_table_order_items"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/ayushimagarde19@gmail.com/Notebook/ELT Data Pipeline for Daily Product Revenue/04 Daily Product Revenue",
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    }
+  ],
+  "queue": {
+    "enabled": true
+  },
+  "environments": [
+    {
+      "environment_key": "Default",
+      "spec": {
+        "environment_version": "5"
+      }
+    }
+  ],
+  "performance_target": "PERFORMANCE_OPTIMIZED"
+}
